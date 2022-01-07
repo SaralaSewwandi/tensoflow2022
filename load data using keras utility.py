@@ -57,7 +57,7 @@ val_ds = tf.keras.utils.image_dataset_from_directory(
 
 #You can find the class names in the class_names attribute on these datasets
 class_names = train_ds.class_names
-print(class_names)
+#print(class_names)
 
 '''
 #visualize the data
