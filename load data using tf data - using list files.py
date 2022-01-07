@@ -61,39 +61,20 @@ for f in list_ds.take(5):
   print(f.numpy()) # convert to numpy array
 '''
 
+file_names_dataset = tf.data.Dataset.list_files(str(data_dir/'*/*'), shuffle=False)
 
 
-# <class 'generator'> converted to image_files  <class 'list'> windows path list
-#image_file_names - list of alphahneumerical oredered file names of alphahneumerical oredered directors, not shuffled
-
-
-file_path= str(data_dir/'*/*')
-
-#glob  the file names initially to improve the performance / calling glob iteratively for each file is not effiecient
-#file_names_list - string file names list
-file_names_list = glob.glob(file_path)
-
-#dataset - TensorSliceDataset shapes: (), types: tf.string>
-file_names_dataset = tf.data.Dataset.from_tensor_slices(file_names_list)
-
-#print(list(file_names_dataset.as_numpy_iterator()))
-
-'''
-for f in file_names_dataset.take(5):
-  print(f.numpy())
-'''
 #During training, it's important to shuffle the data well - poorly shuffled data can result in lower training accuracy.
-tf.random.set_seed(1000) # set gloal seed to get the same order result every time, if this line is commented time to time results will be different
 shuffled_file_names_dataset = file_names_dataset.shuffle(image_count, reshuffle_each_iteration=False)
 
-print(list(shuffled_file_names_dataset.as_numpy_iterator()))
+#print(list(shuffled_file_names_dataset.as_numpy_iterator()))
 
 #prepare folder list with the class  names , can include a LICENSE.txt file but do not include any other additional file or folder in the root
 #directory
 #The tree structure of the files can be used to compile a class_names list.
 
 class_names = np.array(sorted([item.name for item in data_dir.glob('*') if item.name != "LICENSE.txt"]))
-print(class_names)
+#print(class_names)
 
 
 #data set split - validation and training data sets
@@ -143,7 +124,7 @@ train_ds = train_ds.map(process_path, num_parallel_calls=tf.data.AUTOTUNE)
 #<class 'tensorflow.python.data.ops.dataset_ops.ParallelMapDataset'>
 val_ds = val_ds.map(process_path, num_parallel_calls=tf.data.AUTOTUNE)
 
-
+'''
 
 for image, label in train_ds.take(1):
   print("Image shape: ", image.numpy().shape)
@@ -151,7 +132,7 @@ for image, label in train_ds.take(1):
   print("Label: ", label.numpy())
   print(type(label))
 
-
+'''
 
 #Configure dataset for performance
 def configure_for_performance(dataset):
@@ -206,15 +187,19 @@ def configure_for_performance(dataset):
 train_ds_batches = configure_for_performance(train_ds)
 
 
-
+'''
 for image_batch, label_batch in train_ds_batches.take(1):
   print("Image batch shape: ", image_batch.numpy().shape)
   #print(image)
   print(type(image_batch))
   print("Label batch: ", label_batch.numpy())
   print(type(label_batch))
+  
+'''
 
 val_ds_batches = configure_for_performance(val_ds)
+
+'''
 for image_batch, label_batch in val_ds_batches.take(1):
   print("Image batch shape: ", image_batch.numpy().shape)
   #print(image)
@@ -227,7 +212,7 @@ for image_batch, label_batch in val_ds_batches.take(1):
 
 print(train_ds_batches)
 #<PrefetchDataset shapes: ((None, 180, 180, 3), (None,)), types: (tf.float32, tf.int64)>
-
+'''
 
 #define the model
 num_classes = 5
