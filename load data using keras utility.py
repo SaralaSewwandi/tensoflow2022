@@ -156,4 +156,4 @@ model.fit(
 )
 
 print("Execution time:", time.perf_counter() - start_time)
-#Execution time: 265108392600 ns - > 265.1083926s
+#Execution time: 258.61092080000003s
