@@ -30,7 +30,7 @@ data_dir = tf.keras.utils.get_file(origin=dataset_url,
 
 data_dir = pathlib.Path(data_dir)
 
-batch_size = 10
+batch_size = 32
 img_height = 180
 img_width = 180
 
@@ -57,6 +57,7 @@ val_ds = tf.keras.utils.image_dataset_from_directory(
 class_names = train_ds.class_names
 print(class_names)
 
+'''
 #visualize the data
 plt.figure(figsize=(10, 10))
 for image_batch, label_batch in train_ds.take(1):
@@ -69,7 +70,7 @@ for image_batch, label_batch in train_ds.take(1):
     plt.axis("off")
   #plt.show()
 
-
+'''
 #Standardize the data
 #The RGB channel values are in the [0, 255] range. This is not ideal for a neural network; in general you should seek to make your input values small.
 
@@ -90,7 +91,7 @@ normalization_layer = tf.keras.layers.Rescaling(1./255) # can do like this or in
 #parallelize data transformation - mapping
 normalized_ds = train_ds.map(lambda x, y: (normalization_layer(x), y),num_parallel_calls=tf.data.AUTOTUNE)
 
-
+'''
 #train_ds -> BatchDataset
 #normalized_ds - > <class 'tensorflow.python.data.ops.dataset_ops.MapDataset'>
 image_batch, labels_batch = next(iter(normalized_ds))
@@ -100,7 +101,7 @@ image_batch, labels_batch = next(iter(normalized_ds))
 first_image = image_batch[0]
 # Notice the pixel values are now in `[0,1]`.
 print(np.min(first_image), np.max(first_image))
-
+'''
 
 #Configure the dataset for performance
 
@@ -122,7 +123,7 @@ train_ds = train_ds.cache().prefetch(buffer_size=AUTOTUNE)
 # cache a dataset, either in memory or on local storage
 val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
-print(train_ds)
+#print(train_ds)
 #define the model
 num_classes = 5
 
