@@ -15,7 +15,7 @@ import time
 # data_dir="E:\\flower_photos"
 # data_dir = pathlib.Path(data_dir)
 
-start_time = time.perf_counter()
+start_time = time.perf_counter_ns()
 #Download the image data set from the cloud -  vedio/blog content 1
 
 #1.define the image data set url
@@ -40,7 +40,7 @@ train_ds = tf.keras.utils.image_dataset_from_directory(
   data_dir,
   validation_split=0.2,
   subset="training",
-  seed=5, #If using `validation_split` and shuffling the data, you must provide a `seed` argument, to make sure that there is no overlap between the training and validation subset.
+  seed=123, #If using `validation_split` and shuffling the data, you must provide a `seed` argument, to make sure that there is no overlap between the training and validation subset.
   image_size=(img_height, img_width),
   batch_size=batch_size)
 
@@ -155,4 +155,4 @@ model.fit(
   epochs=3
 )
 
-print("Execution time:", time.perf_counter() - start_time)
+print("Execution time:", time.perf_counter_ns() - start_time)
