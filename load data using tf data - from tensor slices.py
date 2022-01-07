@@ -14,10 +14,11 @@ import pathlib
 import matplotlib.pyplot as plt
 import numpy as np
 import glob
+import time
 
 # data_dir="E:\\flower_photos"
 # data_dir = pathlib.Path(data_dir)
-
+start_time = time.perf_counter()
 #Download the image data set from the cloud -  vedio/blog content 1
 
 #1.define the image data set url
@@ -261,6 +262,9 @@ model.fit(
   epochs=3
 )
 
+print("Execution time:", time.perf_counter() - start_time)
+#Execution time: 261.31020120000005
 
 
+##code which used list files method Execution time: 262.6251387s very little time consuming than this Execution time: 261.31020120000005
 
