@@ -156,10 +156,14 @@ def get_image(file_path,width, height):
     image = normalize_image(image)
     return image
 
-def get_image_and_label(file_path):
-    label = get_label(file_path)
-    image = get_image(file_path) #normalized
-    return image, label
+def get_images_and_labels(file_paths_dataset):
+    file_paths_dataset = file_paths_dataset.enumerate()
+    image_label_list = []
+    for file_path in file_paths_dataset.as_numpy_iterator():
+        label = get_label(file_path)
+        image = get_image(file_path) #normalized
+        image_label_list.append((image, label))
+    return tf.data.Dataset.from_tensor_slices(image_label_list)
 
 def shuffle_filenames_dataset(image_and_label_dataset):
     # During training, it's important to shuffle the data well to balance the dataset - poorly shuffled data can result in lower training accuracy.
