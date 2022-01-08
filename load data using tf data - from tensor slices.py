@@ -138,35 +138,35 @@ def decode_image(image):
     image = tf.image.convert_image_dtype(image, tf.float32)
     return image
 
-def get_image(file_path):
-    image = read_image(file_path)
-    image = decode_image(image)
-    return image
-
-def read_image_label(file_path):
-    label = get_label(file_path)
-    image = get_image(file_path)
-    return image, label
-
 def resize_image(image, width, height):
     # width=180
     # height=180
     image = tf.image.resize(image, [width, height])
     return image
 
-def normalize_image_label(image):
+def normalize_image(image):
     normalization_layer = tf.keras.layers.Rescaling(1. / 255)  # can do like this or include this layer in the model
     normalized_image= normalization_layer(image)
     return normalized_image
 
+def get_image(file_path,width, height):
+    image = read_image(file_path)
+    image = decode_image(image)
+    image = resize_image(image, width, height)
+    image = normalize_image(image)
+    return image
 
-def shuffle_filenames_dataset(image_label_dataset):
+def get_image_and_label(file_path):
+    label = get_label(file_path)
+    image = get_image(file_path) #normalized
+    return image, label
+
+def shuffle_filenames_dataset(image_and_label_dataset):
     # During training, it's important to shuffle the data well to balance the dataset - poorly shuffled data can result in lower training accuracy.
     tf.random.set_seed(
         1000)  # set gloal seed to get the same order result every time, if this line is commented time to time results will be different
-    shuffled_file_names_dataset = image_label_dataset.shuffle(image_count, reshuffle_each_iteration=False)
+    shuffled_file_names_dataset = image_and_label_dataset.shuffle(image_count, reshuffle_each_iteration=False)
     return shuffled_file_names_dataset
-
 
 def split_dataset(shuffled_file_names_dataset):
     # data set split - validation and training data sets
