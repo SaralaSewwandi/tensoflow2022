@@ -130,6 +130,14 @@ def read_image_label(file_path):
     image = read_image(file_path)
     return image, label
 
+def shuffle_filenames_dataset(dataset):
+    # During training, it's important to shuffle the data well to balance the dataset - poorly shuffled data can result in lower training accuracy.
+    tf.random.set_seed(
+        1000)  # set gloal seed to get the same order result every time, if this line is commented time to time results will be different
+    shuffled_file_names_dataset = dataset.shuffle(image_count, reshuffle_each_iteration=False)
+    return dataset
+
+
 def process_path(file_path):
   # #<class 'tensorflow.python.framework.ops.EagerTensor'>
   # label = get_label(file_path)
