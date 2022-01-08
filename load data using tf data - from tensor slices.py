@@ -165,23 +165,23 @@ def get_images_and_labels(file_paths_dataset):
         image_label_list.append((image, label))
     return tf.data.Dataset.from_tensor_slices(image_label_list)
 
-def shuffle_filenames_dataset(image_and_label_dataset):
+def shuffle_images_and_labels_dataset(images_and_labels_dataset):
     # During training, it's important to shuffle the data well to balance the dataset - poorly shuffled data can result in lower training accuracy.
     tf.random.set_seed(
         1000)  # set gloal seed to get the same order result every time, if this line is commented time to time results will be different
-    shuffled_file_names_dataset = image_and_label_dataset.shuffle(image_count, reshuffle_each_iteration=False)
+    shuffled_file_names_dataset = images_and_labels_dataset.shuffle(image_count, reshuffle_each_iteration=False)
     return shuffled_file_names_dataset
 
-def split_dataset(shuffled_file_names_dataset):
+def split_images_and_labels_dataset(shuffled_images_and_labels_dataset):
     # data set split - validation and training data sets
     # image count =50  val_size=10
     val_size = int(image_count * 0.2)
     # create a data set skipping the first 10 elements, take last 40 elements
     # <class 'tensorflow.python.data.ops.dataset_ops.SkipDataset'>
-    train_ds = shuffled_file_names_dataset.skip(val_size)
+    train_ds = shuffled_images_and_labels_dataset.skip(val_size)
     # take first 10 elements
     # <class 'tensorflow.python.data.ops.dataset_ops.TakeDataset'>
-    val_ds = shuffled_file_names_dataset.take(val_size)
+    val_ds = shuffled_images_and_labels_dataset.take(val_size)
     return train_ds, val_ds
 
 
