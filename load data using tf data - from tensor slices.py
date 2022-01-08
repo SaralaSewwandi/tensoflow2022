@@ -149,19 +149,28 @@ def normalize_image(image):
     normalized_image= normalization_layer(image)
     return normalized_image
 
-def get_image(file_path,width, height):
+def read_image(file_path):
     image = read_image(file_path)
-    image = decode_image(image)
-    image = resize_image(image, width, height)
-    image = normalize_image(image)
     return image
 
+#read images and laels -> interleave
 def get_images_and_labels(file_paths_dataset):
     file_paths_dataset = file_paths_dataset.enumerate()
     image_label_list = []
     for file_path in file_paths_dataset.as_numpy_iterator():
         label = get_label(file_path)
-        image = get_image(file_path) #normalized
+        image = read_image(file_path) #normalized
+        image_label_list.append((image, label))
+    return tf.data.Dataset.from_tensor_slices(image_label_list)
+
+#time consuming transformations - > map
+def transform_image_dataset(image_label_dataset,width,height):
+    image_label_dataset = image_label_dataset.enumerate()
+    image_label_list = []
+    for image, label  in image_label_dataset.as_numpy_iterator():
+        image = decode_image(image)
+        image = resize_image(image, width, height)
+        image = normalize_image(image)
         image_label_list.append((image, label))
     return tf.data.Dataset.from_tensor_slices(image_label_list)
 
@@ -184,7 +193,11 @@ def split_images_and_labels_dataset(shuffled_images_and_labels_dataset):
     val_ds = shuffled_images_and_labels_dataset.take(val_size)
     return train_ds, val_ds
 
-
+#memory consuming transformations - > map
+def shuffle_and_split_image_label_dataset(image_label_dataset):
+    shuffled_dataset= shuffle_images_and_labels_dataset(image_label_dataset)
+    train_dataset, val_dataset = split_images_and_labels_dataset(shuffled_dataset)
+    return train_dataset, val_dataset
 # Use Dataset.map to create a dataset of image, label pairs
 # Set `num_parallel_calls` so multiple images are loaded/processed in parallel.
 # <class 'tensorflow.python.data.ops.dataset_ops.ParallelMapDataset'>
@@ -204,7 +217,8 @@ for image, label in train_ds.take(1):
 
 
 # Configure dataset for performance
-def configure_for_performance(dataset):
+def configure_for_performance(file_paths_dataset):
+    '''
     # 1. vectorized or batched before mapping
     dataset = dataset.batch(32)
     # 2. interleaving & time consuming mapping
@@ -230,27 +244,24 @@ def configure_for_performance(dataset):
     return dataset
 
     '''
-    tf.data.Dataset.range(2)
-    .interleave(  # Parallelize data reading
-        dataset_generator_fun,
+
+    file_paths_dataset.interleave(  # Parallelize data reading
+        lambda x:get_images_and_labels(x), #dataset_generator_fun
         num_parallel_calls=tf.data.AUTOTUNE
-    )
-    .batch(  # Vectorize your mapped function
-        _batch_map_num_items,
-        drop_remainder=True)
-    .map(  # Parallelize map transformation
+    ).batch(  # Vectorize your mapped function
+        32,
+        drop_remainder=True).map(  # Parallelize map transformation
         time_consuming_map,
         num_parallel_calls=tf.data.AUTOTUNE
-    )
-    .cache()  # Cache data
-    .map(  # Reduce memory usage
+    ).cache( # Cache data
+
+        ) .map(  # Reduce memory usage
         memory_consuming_map,
         num_parallel_calls=tf.data.AUTOTUNE
+    ).prefetch(  # Overlap producer and consumer works
+        buffer_size=tf.data.AUTOTUNE
     )
-    .prefetch(  # Overlap producer and consumer works
-        tf.data.AUTOTUNE
-    )
-    '''
+
 
 
 #train_ds_batches = configure_for_performance(train_ds)
