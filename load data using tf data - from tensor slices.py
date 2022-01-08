@@ -185,23 +185,6 @@ def split_images_and_labels_dataset(shuffled_images_and_labels_dataset):
     return train_ds, val_ds
 
 
-def process_path(file_path):
-    # #<class 'tensorflow.python.framework.ops.EagerTensor'>
-    # label = get_label(file_path)
-    # # Load the raw data from the file as a string
-    # img = tf.io.read_file(file_path)
-    # # <class 'tensorflow.python.framework.ops.EagerTensor'>,
-    # img = decode_img(img)
-    # return img, label
-
-    label = get_label(file_path)
-    image = tf.io.read_file(file_path)
-    image = tf.io.decode_jpeg(image, channels=3)
-    image = tf.image.convert_image_dtype(image, tf.float32)
-    image = tf.image.resize(image, [180, 180])
-    return image, label
-
-
 # Use Dataset.map to create a dataset of image, label pairs
 # Set `num_parallel_calls` so multiple images are loaded/processed in parallel.
 # <class 'tensorflow.python.data.ops.dataset_ops.ParallelMapDataset'>
