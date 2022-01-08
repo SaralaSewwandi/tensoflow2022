@@ -120,6 +120,16 @@ def get_label(file_path):
   # Integer encode the label
   return tf.argmax(one_hot)
 
+def read_image(file_path):
+    image = tf.io.read_file(file_path)
+    #check the image file type
+    return image
+
+def read_image_label(file_path):
+    label = get_label(file_path)
+    image = read_image(file_path)
+    return image, label
+
 def process_path(file_path):
   # #<class 'tensorflow.python.framework.ops.EagerTensor'>
   # label = get_label(file_path)
