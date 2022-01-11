@@ -238,3 +238,29 @@ Size of gzipped pruned Keras model: 25742.00 bytes
 Size of gzipped pruned TFlite model: 25145.00 bytes
 '''
 
+'''
+4.
+Create a 10x smaller model from combining pruning and quantization
+You can apply post-training quantization to the pruned model for additional benefits
+'''
+
+converter = tf.lite.TFLiteConverter.from_keras_model(model_for_export)
+converter.optimizations = [tf.lite.Optimize.DEFAULT]
+quantized_and_pruned_tflite_model = converter.convert()
+
+_, quantized_and_pruned_tflite_file = tempfile.mkstemp('.tflite')
+
+with open(quantized_and_pruned_tflite_file, 'wb') as f:
+  f.write(quantized_and_pruned_tflite_model)
+
+print('Saved quantized and pruned TFLite model to:', quantized_and_pruned_tflite_file)
+
+print("Size of gzipped baseline Keras model: %.2f bytes" % (get_gzipped_model_size(keras_file)))
+print("Size of gzipped pruned and quantized TFlite model: %.2f bytes" % (get_gzipped_model_size(quantized_and_pruned_tflite_file)))
+
+'''
+OUTPUT
+Saved quantized and pruned TFLite model to: C:\Users\SARALA~1\AppData\Local\Temp\tmp6w6zjw60.tflite
+Size of gzipped baseline Keras model: 78342.00 bytes
+Size of gzipped pruned and quantized TFlite model: 8219.00 bytes
+'''
