@@ -58,3 +58,13 @@ tflite_models_dir.mkdir(exist_ok=True, parents=True)
 tflite_model_quant_file = tflite_models_dir/"mnist_model_quant.tflite"
 print(tflite_model_quant_file.write_bytes(tflite_quant_model))
 #23920
+
+#Run the TFLite models
+'''
+Run the TensorFlow Lite model using the Python TensorFlow Lite Interpreter.
+
+Load the model into an interpreter
+'''
+
+interpreter_quant = tf.lite.Interpreter(model_path=str(tflite_model_quant_file))
+interpreter_quant.allocate_tensors()
