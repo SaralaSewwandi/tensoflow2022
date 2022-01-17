@@ -7,7 +7,7 @@ import tensorflow as tf
 from tensorflow import keras
 import numpy as np
 import pathlib
-
+import matplotlib.pylab as plt
 #Train a TensorFlow model
 
 # Load MNIST dataset
@@ -68,3 +68,58 @@ Load the model into an interpreter
 
 interpreter_quant = tf.lite.Interpreter(model_path=str(tflite_model_quant_file))
 interpreter_quant.allocate_tensors()
+
+#Test the model on one image
+test_image = np.expand_dims(test_images[0], axis=0).astype(np.float32)
+
+input_index = interpreter_quant.get_input_details()[0]["index"]
+output_index = interpreter_quant.get_output_details()[0]["index"]
+
+interpreter_quant.set_tensor(input_index, test_image)
+interpreter_quant.invoke()
+predictions = interpreter_quant.get_tensor(output_index)
+
+
+
+plt.imshow(test_images[0])
+template = "True:{true}, predicted:{predict}"
+_ = plt.title(template.format(true= str(test_labels[0]),
+                              predict=str(np.argmax(predictions[0]))))
+plt.grid(False)
+
+#plt.show()
+
+#Evaluate the models
+# A helper function to evaluate the TF Lite model using "test" dataset.
+def evaluate_model(interpreter):
+  input_index = interpreter.get_input_details()[0]["index"]
+  output_index = interpreter.get_output_details()[0]["index"]
+
+  # Run predictions on every image in the "test" dataset.
+  prediction_digits = []
+  for test_image in test_images:
+    # Pre-processing: add batch dimension and convert to float32 to match with
+    # the model's input data format.
+    test_image = np.expand_dims(test_image, axis=0).astype(np.float32)
+    interpreter.set_tensor(input_index, test_image)
+
+    # Run inference.
+    interpreter.invoke()
+
+    # Post-processing: remove batch dimension and find the digit with highest
+    # probability.
+    output = interpreter.tensor(output_index)
+    digit = np.argmax(output()[0])
+    prediction_digits.append(digit)
+
+  # Compare prediction results with ground truth labels to calculate accuracy.
+  accurate_count = 0
+  for index in range(len(prediction_digits)):
+    if prediction_digits[index] == test_labels[index]:
+      accurate_count += 1
+  accuracy = accurate_count * 1.0 / len(prediction_digits)
+
+  return accuracy
+
+print(evaluate_model(interpreter_quant))
+#0.9702
