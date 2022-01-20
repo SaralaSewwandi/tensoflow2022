@@ -16,9 +16,6 @@ from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.resnet50 import preprocess_input, decode_predictions
 import numpy as np
 
-
-data_dir = 'E:\\image_net'
-
 def validate_resnet101(data_dir):
     #data_dir path to validation data set
     data_dir = pathlib.Path(data_dir)
