@@ -71,7 +71,7 @@ def validate_resnet101(data_dir):
         preds = model.predict(x)
         #get the top prediction with the highest prediction probability for the class
         top1_outputs = decode_predictions(preds, top=1)[0]
-        #get the predicted class name from the inference
+        #get the predicted class name from the inference - based on the description from the decoded results (class, description, probability)
         predcited_class = top1_outputs[0][1]
         #get the class name for the image label
         actual = class_names[label]
@@ -113,7 +113,7 @@ def main():
     '''
     print("validation started")
 
-    data_dir = 'E:\\image_net_dataset'
+    data_dir = 'E:\\smaller_imagenet_validation'
     validate_resnet101(data_dir)
 
     print("validation completed")
