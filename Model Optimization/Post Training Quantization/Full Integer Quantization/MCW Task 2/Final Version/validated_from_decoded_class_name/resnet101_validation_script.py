@@ -21,14 +21,15 @@ def validate_resnet101(data_dir):
     data_dir = pathlib.Path(data_dir)
 
     # The tree structure of the files can be used to compile a class_names list.
-    class_names = np.array(sorted([item.name for item in data_dir.glob('*') if item.name != "LICENSE.txt"]))
+    #class_names = np.array(sorted([item.name for item in data_dir.glob('*') if item.name != "LICENSE.txt"]))
+    Imagenet_class_ids = np.loadtxt("D:\\ImageNetLabels.txt", usecols=0, dtype=str)
 
     # convert a file path to an (img, label) pair:
     def get_label(file_path):
         # Convert the path to a list of path components
         parts = tf.strings.split(file_path, os.path.sep)
         # The second to last is the class-directory
-        one_hot = parts[-2] == class_names
+        one_hot = parts[-2] == Imagenet_class_ids
         # Integer encode the label
         return tf.argmax(one_hot)
 
@@ -75,7 +76,7 @@ def validate_resnet101(data_dir):
         #get the predicted class name from the inference , based on the class name from the decoded results (class, description, probability)
         predcited_class = top1_outputs[0][0]
         #get the class name for the image label
-        actual = class_names[label]
+        actual = Imagenet_class_ids[label]
         #check whether the predicted class is equal to the actual class
         if (predcited_class == actual):
             correct = correct + 1
@@ -90,14 +91,18 @@ def validate_resnet101(data_dir):
 
 def main():
     '''
-    download the imagenet data set with class name folders
+    #1.download the imagenet data set with class name folders
     so this script validated the model based on the decoded class name
     https://drive.google.com/drive/u/1/folders/10pJ28cmO2KfdDdfX9uC0iNZnMPSp9ZM8
 
+    #2.place the ImageNetLabels.txt file and set the path accordingly
+    Download from the following link
+    https://github.com/SaralaSewwandi/image_net_dataset/blob/main/ImageNetLabels.txt
     '''
     print("validation started")
 
-    data_dir = 'D:\\smaller_imagenet_validation'
+    #data_dir = 'D:\\smaller_imagenet_validation'
+    data_dir = 'D:\\imagenet'
     validate_resnet101(data_dir)
 
     print("validation completed")
