@@ -87,3 +87,66 @@ _, q_aware_model_accuracy = q_aware_model.evaluate(
 
 print("q_aware_model_accuracy",q_aware_model_accuracy)
 #q_aware_model_accuracy 0.9595999717712402
+
+#Create quantized model for TFLite backend
+#After this, you have an actually quantized model with int8 weights and uint8 activations.
+converter = tf.lite.TFLiteConverter.from_keras_model(q_aware_model)
+converter.optimizations = [tf.lite.Optimize.DEFAULT]
+
+quantized_tflite_model = converter.convert()
+
+import numpy as np
+
+def evaluate_model(interpreter):
+  input_index = interpreter.get_input_details()[0]["index"]
+  output_index = interpreter.get_output_details()[0]["index"]
+
+  # Run predictions on every image in the "test" dataset.
+  prediction_digits = []
+  for i, test_image in enumerate(test_images):
+    if i % 1000 == 0:
+      print('Evaluated on {n} results so far.'.format(n=i))
+    # Pre-processing: add batch dimension and convert to float32 to match with
+    # the model's input data format.
+    test_image = np.expand_dims(test_image, axis=0).astype(np.float32)
+    interpreter.set_tensor(input_index, test_image)
+
+    # Run inference.
+    interpreter.invoke()
+
+    # Post-processing: remove batch dimension and find the digit with highest
+    # probability.
+    output = interpreter.tensor(output_index)
+    digit = np.argmax(output()[0])
+    prediction_digits.append(digit)
+
+  print('\n')
+  # Compare prediction results with ground truth labels to calculate accuracy.
+  prediction_digits = np.array(prediction_digits)
+  accuracy = (prediction_digits == test_labels).mean()
+  return accuracy
+
+interpreter = tf.lite.Interpreter(model_content=quantized_tflite_model)
+interpreter.allocate_tensors()
+
+test_accuracy = evaluate_model(interpreter)
+
+print('Quant TFLite test_accuracy:', test_accuracy)
+print('Quant TF test accuracy:', q_aware_model_accuracy)
+
+#You can create a float TFLite model and then see that the quantized TFLite model is 4x smaller.
+
+# Measure sizes of models.
+_, quant_file = tempfile.mkstemp('.tflite')
+
+with open(quant_file, 'wb') as f:
+  f.write(quantized_tflite_model)
+
+print("Quantized model in Mb:", os.path.getsize(quant_file) / float(2**20))
+
+'''
+Quant TFLite test_accuracy: 0.9634
+Quant TF test accuracy: 0.9634000062942505
+Quantized model in Mb: 0.023468017578125
+'''
+
